@@ -3,6 +3,8 @@ import triton.language as tl
 
 import torch
 
+
+
 def test_mixed_structured_and_unstructured():
     @triton.jit
     def mixed(in_ptr0, in_ptr1, stride_0, stride_1, out_ptr0, out_ptr1):
@@ -168,7 +170,31 @@ def test_intermediate_ptr_as_base():
 
 
 
+def test_bug():
+    @triton.jit
+    def simple_cf_into_structured_load(in_ptr0, in_ptr1, out_ptr, idx):
+        if idx == 1:
+            in_ptr += idx * 2
+        else:
+            in_ptr += idx
+
+        in_ptr += 6
+
+        offsets = tl.arange(0, 4)
+        ptrs = in_ptr + offsets
+        vals = tl.load(ptrs)
+        tl.store(out_ptr + offsets, vals)
+
+    src = triton.compiler.ASTSource(
+        fn=simple_cf_into_structured_load,
+        signature="*fp32,*fp32,*fp32,i32",
+    )
+    ret = triton.compile(
+        src,
+    )
+    print(ret.asm["ttir"])
 
 # test_control_flow()
-test_mixed_structured_and_unstructured()
+# test_mixed_structured_and_unstructured()
 # test_intermediate_ptr_as_base()
+test_bug()

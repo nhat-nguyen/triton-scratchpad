@@ -20,7 +20,7 @@ stride_qg = 96
 
 BLOCK_M = 16
 BLOCK_DMODEL = 128
-Q_PER_K = 4
+Q_PER_K = 19
 
 offs_m = torch.arange(0, BLOCK_M)
 offs_d = torch.arange(0, BLOCK_DMODEL)
